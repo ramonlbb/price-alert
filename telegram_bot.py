@@ -8,38 +8,34 @@ CHAT_ID = os.getenv("CHAT_ID")
 GH_TOKEN = os.getenv("GH_TOKEN")
 
 REPO = "ramonlbb/price-alert"
-FILE_PATH = "alerts.json"
 BRANCH = "main"
 
-
-def send_message(text):
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    requests.post(url, json={"chat_id": CHAT_ID, "text": text})
+ALERTS_FILE = "alerts.json"
+OFFSET_FILE = "telegram_offset.json"
 
 
-def github_headers():
+def gh_headers():
     return {
         "Authorization": f"token {GH_TOKEN}",
         "Accept": "application/vnd.github.v3+json"
     }
 
 
-def get_alerts():
-    url = f"https://api.github.com/repos/{REPO}/contents/{FILE_PATH}"
-    r = requests.get(url, headers=github_headers())
+def gh_get_file(path):
+    url = f"https://api.github.com/repos/{REPO}/contents/{path}"
+    r = requests.get(url, headers=gh_headers())
     r.raise_for_status()
     data = r.json()
-
     content = base64.b64decode(data["content"]).decode()
     return json.loads(content), data["sha"]
 
 
-def update_alerts(alerts, sha, message):
+def gh_update_file(path, content_json, sha, message):
     content = base64.b64encode(
-        json.dumps(alerts, indent=2).encode()
+        json.dumps(content_json, indent=2).encode()
     ).decode()
 
-    url = f"https://api.github.com/repos/{REPO}/contents/{FILE_PATH}"
+    url = f"https://api.github.com/repos/{REPO}/contents/{path}"
     payload = {
         "message": message,
         "content": content,
@@ -47,8 +43,13 @@ def update_alerts(alerts, sha, message):
         "branch": BRANCH
     }
 
-    r = requests.put(url, headers=github_headers(), json=payload)
+    r = requests.put(url, headers=gh_headers(), json=payload)
     r.raise_for_status()
+
+
+def send_message(text):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    requests.post(url, json={"chat_id": CHAT_ID, "text": text})
 
 
 def process_command(text):
@@ -58,30 +59,24 @@ def process_command(text):
         symbol = parts[1].upper() + ".SA"
         target = float(parts[2])
 
-        alerts, sha = get_alerts()
+        alerts, sha = gh_get_file(ALERTS_FILE)
 
         alerts[symbol] = {
             "target": target,
             "alert_sent": False
         }
 
-        update_alerts(alerts, sha, f"Novo alerta {symbol} {target}")
-        send_message(f"✅ Alerta criado\n{symbol}\nPreço alvo: {target}")
+        gh_update_file(
+            ALERTS_FILE,
+            alerts,
+            sha,
+            f"Atualiza alerta {symbol} {target}"
+        )
 
-    elif parts[0] == "/remove" and len(parts) == 2:
-        symbol = parts[1].upper() + ".SA"
-
-        alerts, sha = get_alerts()
-
-        if symbol in alerts:
-            del alerts[symbol]
-            update_alerts(alerts, sha, f"Remove alerta {symbol}")
-            send_message(f"🗑️ Alerta removido: {symbol}")
-        else:
-            send_message("⚠️ Ativo não encontrado")
+        send_message(f"✅ Alerta atualizado\n{symbol}\nPreço alvo: {target}")
 
     elif parts[0] == "/list":
-        alerts, _ = get_alerts()
+        alerts, _ = gh_get_file(ALERTS_FILE)
 
         if not alerts:
             send_message("Nenhum alerta ativo.")
@@ -95,28 +90,43 @@ def process_command(text):
 
     else:
         send_message(
-            "❓ Comandos disponíveis:\n"
+            "Comandos:\n"
             "/alert ATIVO PRECO\n"
-            "/remove ATIVO\n"
             "/list"
         )
 
 
 def main():
+    offset_data, offset_sha = gh_get_file(OFFSET_FILE)
+    last_update = offset_data.get("last_update_id", 0)
+
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
-    r = requests.get(url).json()
+    params = {"offset": last_update + 1}
+    r = requests.get(url, params=params).json()
 
     if not r["result"]:
         return
 
-    last = r["result"][-1]
-    chat_id = str(last["message"]["chat"]["id"])
+    for upd in r["result"]:
+        update_id = upd["update_id"]
+        msg = upd.get("message")
+        if not msg:
+            continue
 
-    if chat_id != CHAT_ID:
-        return
+        chat_id = str(msg["chat"]["id"])
+        if chat_id != CHAT_ID:
+            continue
 
-    text = last["message"]["text"]
-    process_command(text)
+        text = msg["text"]
+        process_command(text)
+
+        offset_data["last_update_id"] = update_id
+        gh_update_file(
+            OFFSET_FILE,
+            offset_data,
+            offset_sha,
+            "Atualiza offset Telegram"
+        )
 
 
 if __name__ == "__main__":
