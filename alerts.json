@@ -1,0 +1,10 @@
+{
+  "PETR4.SA": {
+    "target": 30.00,
+    "alert_sent": false
+  },
+  "HGLG11.SA": {
+    "target": 165.00,
+    "alert_sent": false
+  }
+}
