@@ -26,12 +26,18 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      # 🔹 PASSO 1 — normaliza / cria referência / reseta alertas
+      - name: Normalize alerts
+        run: python create_alert.py
+
+      # 🔹 PASSO 2 — verifica preços e dispara alertas
       - name: Run alert script
         run: python alert.py
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
 
+      # 🔹 PASSO 3 — persiste alterações
       - name: Commit updated alerts.json
         run: |
           git config user.name "price-alert-bot"
