@@ -104,27 +104,30 @@ def main():
     params = {"offset": last_update + 1}
     r = requests.get(url, params=params).json()
 
-    if not r["result"]:
+    if not r.get("result"):
         return
 
     last_processed = last_update
 
     for upd in r["result"]:
         update_id = upd["update_id"]
+
         msg = upd.get("message")
         if not msg:
             continue
 
-        chat_id = str(msg["message"]["chat"]["id"])
+        chat_id = str(msg["chat"]["id"])
         if chat_id != CHAT_ID:
             continue
 
-        text = msg["message"]["text"]
-        process_command(text)
+        text = msg.get("text", "").strip()
+        if not text:
+            continue
 
+        process_command(text)
         last_processed = update_id
 
-    # salva offset UMA vez, no final
+    # salva offset UMA vez
     if last_processed != last_update:
         offset_data["last_update_id"] = last_processed
         gh_update_file(
@@ -133,6 +136,7 @@ def main():
             offset_sha,
             "Atualiza offset Telegram"
         )
+
 
 
 if __name__ == "__main__":
