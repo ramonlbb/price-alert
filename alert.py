@@ -19,11 +19,24 @@ def send_telegram_message(message: str):
 
 
 def get_price(symbol: str) -> float:
-    url = f"https://query1.finance.yahoo.com/v7/finance/quote?symbols={symbol}"
-    r = requests.get(url, timeout=10)
-    r.raise_for_status()
-    data = r.json()
-    return data["quoteResponse"]["result"][0]["regularMarketPrice"]
+    url = "https://query1.finance.yahoo.com/v7/finance/quote"
+    headers = {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json"
+    }
+
+    params = {"symbols": symbol}
+
+    for attempt in range(3):
+        r = requests.get(url, headers=headers, params=params, timeout=10)
+
+        if r.status_code == 200:
+            data = r.json()
+            return data["quoteResponse"]["result"][0]["regularMarketPrice"]
+
+        print(f"Tentativa {attempt + 1} falhou ({r.status_code})")
+
+    raise Exception(f"Falha ao obter preço de {symbol}")
 
 
 def main():
