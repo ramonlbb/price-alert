@@ -1,6 +1,7 @@
 import os
 import json
 import requests
+import yfinance as yf
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
@@ -22,18 +23,14 @@ import csv
 import io
 
 def get_price(symbol: str) -> float:
-    stooq_symbol = symbol.replace(".SA", "").lower()
-    url = f"https://stooq.com/q/l/?s={stooq_symbol}&f=sd2t2ohlcv&h&e=csv"
+    ticker = yf.Ticker(symbol)
+    data = ticker.history(period="1d")
 
-    r = requests.get(url, timeout=10)
-    r.raise_for_status()
+    if data.empty:
+        raise Exception(f"Sem dados para {symbol}")
 
-    content = io.StringIO(r.text)
-    reader = csv.DictReader(content)
-    row = next(reader)
-
-    price = float(row["Close"])
-    return price
+    price = data["Close"].iloc[-1]
+    return float(price)
 
 
 
