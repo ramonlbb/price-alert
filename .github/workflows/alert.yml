@@ -1,0 +1,26 @@
+name: Price Alert
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-alert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run alert script
+        run: python alert.py
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
