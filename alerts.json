@@ -9,6 +9,6 @@
   },
   "CPSH11.SA": {
     "target": 10.75,
-    "alert_sent": false
+    "alert_sent": true
   }
 }
