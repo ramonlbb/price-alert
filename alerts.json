@@ -1,14 +1,12 @@
 {
-  "PETR4.SA": {
-    "target": 31.0,
+  "CPSH11.SA": {
+    "target": 10.75,
+    "reference_price": 10.79,
     "alert_sent": false
   },
   "HGLG11.SA": {
-    "target": 159.7,
-    "alert_sent": true
-  },
-  "CPSH11.SA": {
-    "target": 10.75,
+    "target": 159.70,
+    "reference_price": 157.00,
     "alert_sent": false
   }
 }
