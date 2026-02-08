@@ -47,15 +47,16 @@ def main():
 
         print(f"{symbol}: {price} / alvo {target}")
 
-        if price >= target:
-            send_telegram_message(
-                f"🚨 ALERTA DE PREÇO\n\n"
-                f"Ativo: {symbol}\n"
-                f"Preço atual: {price}\n"
-                f"Alvo definido: {target}"
-            )
+    if price <= target:
+        send_telegram_message(
+            f"🟢 OPORTUNIDADE DE COMPRA\n\n"
+            f"Ativo: {symbol}\n"
+            f"Preço atual: {price:.2f}\n"
+            f"Preço alvo de compra: {target:.2f}"
+        )
+    
+        info["alert_sent"] = True
 
-            info["alert_sent"] = True
 
     with open(ALERTS_FILE, "w") as f:
         json.dump(alerts, f, indent=2)
