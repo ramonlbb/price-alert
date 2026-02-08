@@ -18,25 +18,23 @@ def send_telegram_message(message: str):
     response.raise_for_status()
 
 
+import csv
+import io
+
 def get_price(symbol: str) -> float:
-    url = "https://query1.finance.yahoo.com/v7/finance/quote"
-    headers = {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json"
-    }
+    stooq_symbol = symbol.replace(".SA", "").lower()
+    url = f"https://stooq.com/q/l/?s={stooq_symbol}&f=sd2t2ohlcv&h&e=csv"
 
-    params = {"symbols": symbol}
+    r = requests.get(url, timeout=10)
+    r.raise_for_status()
 
-    for attempt in range(3):
-        r = requests.get(url, headers=headers, params=params, timeout=10)
+    content = io.StringIO(r.text)
+    reader = csv.DictReader(content)
+    row = next(reader)
 
-        if r.status_code == 200:
-            data = r.json()
-            return data["quoteResponse"]["result"][0]["regularMarketPrice"]
+    price = float(row["Close"])
+    return price
 
-        print(f"Tentativa {attempt + 1} falhou ({r.status_code})")
-
-    raise Exception(f"Falha ao obter preço de {symbol}")
 
 
 def main():
