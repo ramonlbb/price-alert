@@ -107,20 +107,26 @@ def main():
     if not r["result"]:
         return
 
+    last_processed = last_update
+
     for upd in r["result"]:
         update_id = upd["update_id"]
         msg = upd.get("message")
         if not msg:
             continue
 
-        chat_id = str(msg["chat"]["id"])
+        chat_id = str(msg["message"]["chat"]["id"])
         if chat_id != CHAT_ID:
             continue
 
-        text = msg["text"]
+        text = msg["message"]["text"]
         process_command(text)
 
-        offset_data["last_update_id"] = update_id
+        last_processed = update_id
+
+    # salva offset UMA vez, no final
+    if last_processed != last_update:
+        offset_data["last_update_id"] = last_processed
         gh_update_file(
             OFFSET_FILE,
             offset_data,
