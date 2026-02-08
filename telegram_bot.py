@@ -14,6 +14,8 @@ ALERTS_FILE = "alerts.json"
 OFFSET_FILE = "telegram_offset.json"
 
 
+# ---------- GitHub helpers ----------
+
 def gh_headers():
     return {
         "Authorization": f"token {GH_TOKEN}",
@@ -47,19 +49,49 @@ def gh_update_file(path, content_json, sha, message):
     r.raise_for_status()
 
 
+# ---------- Telegram helpers ----------
+
 def send_message(text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    requests.post(url, json={"chat_id": CHAT_ID, "text": text})
+    requests.post(url, json={
+        "chat_id": CHAT_ID,
+        "text": text
+    })
 
 
-def process_command(text):
-    parts = text.split()
+# ---------- Command processing ----------
 
-    if parts[0] == "/alert" and len(parts) == 3:
-        symbol = parts[1].upper() + ".SA"
-        target = float(parts[2])
+def process_command(text: str):
+    parts = text.strip().split()
+
+    if not parts:
+        return
+
+    # /alert ATIVO PRECO
+    if parts[0] == "/alert":
+        if len(parts) != 3:
+            send_message(
+                "❌ Uso incorreto\n\n"
+                "Exemplo:\n"
+                "/alert CPSH11 10.75"
+            )
+            return
+
+        symbol = parts[1].upper()
+        if not symbol.endswith(".SA"):
+            symbol += ".SA"
+
+        raw_price = parts[2].replace(",", ".")
+
+        try:
+            target = float(raw_price)
+        except ValueError:
+            send_message("❌ Preço inválido. Use ponto ou vírgula.")
+            return
 
         alerts, sha = gh_get_file(ALERTS_FILE)
+
+        prev_target = alerts.get(symbol, {}).get("target")
 
         alerts[symbol] = {
             "target": target,
@@ -73,9 +105,23 @@ def process_command(text):
             f"Atualiza alerta {symbol} {target}"
         )
 
-        send_message(f"✅ Alerta atualizado\n{symbol}\nPreço alvo: {target}")
+        if prev_target is None:
+            send_message(
+                f"✅ Alerta criado\n\n"
+                f"Ativo: {symbol}\n"
+                f"Preço alvo: {target}"
+            )
+        else:
+            send_message(
+                f"🔄 Alerta atualizado\n\n"
+                f"Ativo: {symbol}\n"
+                f"Novo alvo: {target}"
+            )
 
-    elif parts[0] == "/list":
+        return
+
+    # /list
+    if parts[0] == "/list":
         alerts, _ = gh_get_file(ALERTS_FILE)
 
         if not alerts:
@@ -84,17 +130,21 @@ def process_command(text):
 
         msg = "📊 Alertas ativos:\n\n"
         for s, i in alerts.items():
-            msg += f"{s} → {i['target']}\n"
+            status = "✅" if i.get("alert_sent") else "⏳"
+            msg += f"{status} {s} → {i['target']}\n"
 
         send_message(msg)
+        return
 
-    else:
-        send_message(
-            "Comandos:\n"
-            "/alert ATIVO PRECO\n"
-            "/list"
-        )
+    # fallback
+    send_message(
+        "📌 Comandos disponíveis:\n\n"
+        "/alert ATIVO PRECO\n"
+        "/list"
+    )
 
+
+# ---------- Main loop ----------
 
 def main():
     offset_data, offset_sha = gh_get_file(OFFSET_FILE)
@@ -112,7 +162,7 @@ def main():
     for upd in r["result"]:
         update_id = upd["update_id"]
 
-        msg = upd.get("message")
+        msg = upd.get("message") or upd.get("edited_message")
         if not msg:
             continue
 
@@ -136,7 +186,6 @@ def main():
             offset_sha,
             "Atualiza offset Telegram"
         )
-
 
 
 if __name__ == "__main__":
