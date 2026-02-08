@@ -5,7 +5,7 @@
   },
   "HGLG11.SA": {
     "target": 159.7,
-    "alert_sent": false
+    "alert_sent": true
   },
   "CPSH11.SA": {
     "target": 10.75,
