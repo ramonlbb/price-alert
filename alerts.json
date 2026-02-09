@@ -1,9 +1,7 @@
 {
   "CPSH11.SA": {
-    "target": 10.79,
-    "alert_sent": true,
-    "last_target": 10.79,
-    "reference_price": 10.79
+    "target": 10.65,
+    "alert_sent": false
   },
   "HGLG11.SA": {
     "target": 157.0,
@@ -12,12 +10,12 @@
     "last_target": 157.0
   },
   "TRXF11.SA": {
-    "target": 95.00
+    "target": 95.0
   },
   "GGRC11.SA": {
-    "target": 10.20
+    "target": 10.2
   },
   "BTC-USD": {
-    "target": 65000.00
+    "target": 65000.0
   }
 }
