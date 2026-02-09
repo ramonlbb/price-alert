@@ -1,7 +1,10 @@
 import os
 import json
 import requests
-from market import get_price, ALERTS_FILE
+from market import get_price
+
+ALERTS_FILE = "alerts.json"
+
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
