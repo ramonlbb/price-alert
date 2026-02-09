@@ -1,13 +1,16 @@
 import yfinance as yf
 
-ALERTS_FILE = "alerts.json"
 
-
-def get_price(symbol: str) -> float:
+def get_price(symbol: str) -> float | None:
     ticker = yf.Ticker(symbol)
-    data = ticker.history(period="1d")
+    data = ticker.history(period="5d")
 
     if data.empty:
-        raise Exception(f"Sem dados para {symbol}")
+        return None
 
-    return float(data["Close"].iloc[-1])
+    price = data["Close"].dropna()
+
+    if price.empty:
+        return None
+
+    return float(price.iloc[-1])
