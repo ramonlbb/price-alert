@@ -1,5 +1,7 @@
 import json
-from market import get_price, ALERTS_FILE
+from market import get_price
+
+ALERTS_FILE = "alerts.json"
 
 
 def normalize_alerts():
@@ -14,14 +16,14 @@ def normalize_alerts():
 
         # 🔴 sem preço → ignora ativo
         if price is None:
-            print(f"⚠️ {symbol}: sem cotação no momento (ignorado)")
+            print(f"⚠️ {symbol}: sem cotação no momento")
             continue
 
-        # 🟡 cria referência automaticamente
+        # 🟡 cria referência inicial
         if "reference_price" not in info:
             if target >= price:
                 print(
-                    f"⚠️ {symbol}: target {target:.2f} >= preço atual {price:.2f} (ignorado)"
+                    f"⚠️ {symbol}: target {target:.2f} >= preço atual {price:.2f}"
                 )
                 continue
 
@@ -33,7 +35,7 @@ def normalize_alerts():
             print(f"✅ Referência criada para {symbol}: {price:.2f}")
             continue
 
-        # 🔁 target mudou → reseta alerta
+        # 🔁 target mudou → rearma alerta
         if info.get("last_target") != target:
             if target >= price:
                 print(
