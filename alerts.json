@@ -4,16 +4,16 @@
     "alert_sent": false
   },
   "HGLG11.SA": {
-    "target": 157.0,
+    "target": 156.80,
     "reference_price": 157.0,
     "alert_sent": true,
     "last_target": 157.0
   },
   "TRXF11.SA": {
-    "target": 95.0
+    "target": 93.0
   },
   "GGRC11.SA": {
-    "target": 10.2
+    "target": 9.99
   },
   "BTC-USD": {
     "target": 65000.0
