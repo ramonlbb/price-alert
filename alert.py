@@ -1,12 +1,10 @@
 import os
 import json
 import requests
-import yfinance as yf
+from market import get_price, ALERTS_FILE
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
-
-ALERTS_FILE = "alerts.json"
 
 
 def send_telegram_message(message: str):
@@ -19,16 +17,6 @@ def send_telegram_message(message: str):
     response.raise_for_status()
 
 
-def get_price(symbol: str) -> float:
-    ticker = yf.Ticker(symbol)
-    data = ticker.history(period="1d")
-
-    if data.empty:
-        raise Exception(f"Sem dados para {symbol}")
-
-    return float(data["Close"].iloc[-1])
-
-
 def main():
     with open(ALERTS_FILE, "r") as f:
         alerts = json.load(f)
@@ -37,25 +25,37 @@ def main():
 
     for symbol, info in alerts.items():
         price = get_price(symbol)
+
+        # 🔴 sem preço → ignora ativo
+        if price is None:
+            print(f"⚠️ {symbol}: sem cotação no momento")
+            continue
+
         target = info["target"]
 
-        # Inicialização
+        # 🟡 inicialização defensiva
         if "last_target" not in info:
             info["last_target"] = target
             info["alert_sent"] = False
             info["reference_price"] = price
             updated = True
 
-        # 🔁 TARGET MUDOU → REARMA ALERTA
+        # 🔁 target mudou → rearma alerta
         if target != info.get("last_target"):
-            info["alert_sent"] = False
-            info["reference_price"] = price
-            info["last_target"] = target
-            updated = True
-            print(f"{symbol}: novo target detectado → alerta rearmado")
+            if target < price:
+                info["alert_sent"] = False
+                info["reference_price"] = price
+                info["last_target"] = target
+                updated = True
+                print(f"{symbol}: novo target detectado → alerta rearmado")
+            else:
+                print(
+                    f"⚠️ {symbol}: target inválido ({target:.2f} >= {price:.2f})"
+                )
+                continue
 
-        # Se já alertou, não faz nada
-        if info["alert_sent"]:
+        # se já alertou, não faz nada
+        if info.get("alert_sent"):
             continue
 
         print(
