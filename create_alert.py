@@ -12,7 +12,12 @@ def normalize_alerts():
         target = info["target"]
         price = get_price(symbol)
 
-        # cria referência automaticamente
+        # 🔴 sem preço → ignora ativo
+        if price is None:
+            print(f"⚠️ {symbol}: sem cotação no momento (ignorado)")
+            continue
+
+        # 🟡 cria referência automaticamente
         if "reference_price" not in info:
             if target >= price:
                 print(
@@ -28,7 +33,7 @@ def normalize_alerts():
             print(f"✅ Referência criada para {symbol}: {price:.2f}")
             continue
 
-        # se o target mudou, reseta alerta
+        # 🔁 target mudou → reseta alerta
         if info.get("last_target") != target:
             if target >= price:
                 print(
