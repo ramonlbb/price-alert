@@ -17,6 +17,14 @@ def send_telegram_message(message: str):
     response.raise_for_status()
 
 
+def format_price_br(value: float) -> str:
+    """
+    Converte:
+    68997.74 -> 68.997,74
+    """
+    return f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+
 def main():
     with open(ALERTS_FILE, "r") as f:
         alerts = json.load(f)
@@ -64,11 +72,20 @@ def main():
 
         # 🟢 ALERTA DE COMPRA
         if price <= target:
+
+            # 💱 prefixo correto
+            if symbol == "BTC-USD":
+                price_txt = f"US$ {format_price_br(price)}"
+                target_txt = f"US$ {format_price_br(target)}"
+            else:
+                price_txt = f"R$ {format_price_br(price)}"
+                target_txt = f"R$ {format_price_br(target)}"
+
             send_telegram_message(
                 f"🟢 OPORTUNIDADE DE COMPRA\n\n"
                 f"Ativo: {symbol}\n"
-                f"Preço atual: {price:.2f}\n"
-                f"Preço alvo: {target:.2f}"
+                f"Preço atual: {price_txt}\n"
+                f"Preço alvo: {target_txt}"
             )
 
             info["alert_sent"] = True
