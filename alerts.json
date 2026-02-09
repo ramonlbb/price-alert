@@ -1,21 +1,32 @@
 {
   "CPSH11.SA": {
     "target": 10.65,
-    "alert_sent": false
+    "alert_sent": false,
+    "reference_price": 10.72,
+    "last_target": 10.65
   },
   "HGLG11.SA": {
-    "target": 156.80,
-    "reference_price": 157.0,
-    "alert_sent": true,
-    "last_target": 157.0
+    "target": 156.8,
+    "reference_price": 156.82,
+    "alert_sent": false,
+    "last_target": 156.8
   },
   "TRXF11.SA": {
-    "target": 93.0
+    "target": 93.0,
+    "reference_price": 93.18,
+    "alert_sent": false,
+    "last_target": 93.0
   },
   "GGRC11.SA": {
-    "target": 9.99
+    "target": 9.99,
+    "last_target": 9.99,
+    "alert_sent": true,
+    "reference_price": 9.99
   },
   "BTC-USD": {
-    "target": 65000.0
+    "target": 65000.0,
+    "reference_price": 69336.21,
+    "alert_sent": false,
+    "last_target": 65000.0
   }
 }
