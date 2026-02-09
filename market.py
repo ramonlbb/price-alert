@@ -9,8 +9,8 @@ def get_price(symbol: str) -> float | None:
         return None
 
     price = data["Close"].dropna()
+
     if price.empty:
         return None
 
-    # arredondamento limpo (2 casas)
     return round(float(price.iloc[-1]), 2)
