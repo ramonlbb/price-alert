@@ -1,16 +1,16 @@
 {
   "CPSH11.SA": {
     "target": 10.65,
-    "alert_sent": true,
-    "reference_price": 10.72,
-    "last_target": 10.65,
-    "rearm_price": 10.79
+    "alert_sent": false,
+    "reference_price": 10.84,
+    "last_target": 10.65
   },
   "HGLG11.SA": {
     "target": 156.8,
     "reference_price": 156.82,
-    "alert_sent": false,
-    "last_target": 156.8
+    "alert_sent": true,
+    "last_target": 156.8,
+    "rearm_price": 159.05
   },
   "TRXF11.SA": {
     "target": 93.0,
