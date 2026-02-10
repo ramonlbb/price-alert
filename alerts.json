@@ -15,8 +15,9 @@
   "TRXF11.SA": {
     "target": 93.0,
     "reference_price": 93.18,
-    "alert_sent": false,
-    "last_target": 93.0
+    "alert_sent": true,
+    "last_target": 93.0,
+    "rearm_price": 94.39
   },
   "GGRC11.SA": {
     "target": 9.99,
