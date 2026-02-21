@@ -18,10 +18,8 @@
     "rearm_price": 94.39
   },
   "GGRC11.SA": {
-    "target": 9.99,
-    "last_target": 9.99,
-    "alert_sent": true,
-    "reference_price": 9.99
+    "target": 9.8,
+    "alert_sent": false
   },
   "BTC-USD": {
     "target": 65000.0,
