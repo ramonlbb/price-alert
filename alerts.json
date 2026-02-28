@@ -25,10 +25,9 @@
   },
   "BTC-USD": {
     "target": 65000.0,
-    "reference_price": 64996.73,
-    "alert_sent": true,
-    "last_target": 65000.0,
-    "rearm_price": 65971.68
+    "reference_price": 66364.98,
+    "alert_sent": false,
+    "last_target": 65000.0
   },
   "BTC-USD.SA": {
     "target": 60000.0,
