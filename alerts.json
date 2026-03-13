@@ -8,8 +8,9 @@
   "HGLG11.SA": {
     "target": 156.8,
     "reference_price": 159.16,
-    "alert_sent": false,
-    "last_target": 156.8
+    "alert_sent": true,
+    "last_target": 156.8,
+    "rearm_price": 159.11
   },
   "TRXF11.SA": {
     "target": 92.0,
